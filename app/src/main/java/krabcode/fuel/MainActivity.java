@@ -11,12 +11,14 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -87,7 +89,9 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //INPUT FORM
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public static class FormFragment extends Fragment {
         /**
          * The fragment argument representing the section number for this
@@ -102,8 +106,8 @@ public class MainActivity extends AppCompatActivity {
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static FormFragment newInstance(int sectionNumber) {
-            FormFragment fragment = new FormFragment();
+        public static MainActivity.FormFragment newInstance(int sectionNumber) {
+            MainActivity.FormFragment fragment = new MainActivity.FormFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -113,12 +117,50 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_form, container, false);
+            final View rootView = inflater.inflate(R.layout.fragment_form, container, false);
+
+            EditText viewEditLitres = (EditText) rootView.findViewById(R.id.editText_litres);
+            viewEditLitres.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    updateCostPerLitre(rootView);
+                    return false;
+                }
+            });
+
+            EditText viewTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
+            viewTotalCost.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    updateCostPerLitre(rootView);
+                    return false;
+                }
+            });
+
             return rootView;
         }
     }
 
+    private static void updateCostPerLitre(View rootView)
+    {
+        EditText viewEditLitres = (EditText) rootView.findViewById(R.id.editText_litres);
+        EditText viewTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
+        TextView textView_costPerLitre = (TextView) rootView.findViewById(R.id.textView_costPerLitre);
+        try{
+            float litres =  Float.parseFloat(viewEditLitres.getText().toString());
+            float totalCost = Float.parseFloat(viewTotalCost.getText().toString());
+            float costPerLitre = totalCost / litres;
+            String costPerLitreText = new StringBuilder().append(rootView.getResources().getString(R.string.form_title_4)).append(costPerLitre).toString();
+            textView_costPerLitre.setText(costPerLitreText);
+        }catch(Exception e)
+        {
 
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //LOG
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public static class LogFragment extends Fragment {
         /**
          * The fragment argument representing the section number for this
@@ -149,6 +191,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //ANALYTICS
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public static class AnalyticsFragment extends Fragment {
         /**
          * The fragment argument representing the section number for this
@@ -180,6 +225,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //PAGING
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.

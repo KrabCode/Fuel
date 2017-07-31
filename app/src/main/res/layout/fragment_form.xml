@@ -8,11 +8,60 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="krabcode.fuel.MainActivity$FormFragment">
 
+
     <TextView
-        android:id="@+id/log_title"
-        android:text="Form"
+        android:id="@+id/textView_liters"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAllCaps="true"/>
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/form_title_1" />
+
+    <EditText
+        android:id="@+id/editText_litres"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView_liters"
+        android:ems="10"
+        android:inputType="numberDecimal" />
+
+    <CheckBox
+        android:id="@+id/checkBox_full"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/editText_litres"
+        android:layout_alignBottom="@+id/editText_litres"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@+id/editText_litres"
+        android:checked="true"
+        android:text="@string/form_title_2"
+        android:textAppearance="@android:style/TextAppearance.Material.Small" />
+
+    <TextView
+        android:id="@+id/textView_cost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editText_litres"
+        android:text="@string/form_title_3" />
+
+    <EditText
+        android:id="@+id/editText_cost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView_cost"
+        android:ems="10"
+        android:inputType="numberDecimal" />
+
+    <TextView
+        android:id="@+id/textView_costPerLitre"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/editText_cost"
+        android:layout_alignBottom="@+id/editText_cost"
+        android:layout_alignStart="@+id/checkBox_full"
+        android:text="@string/form_title_4" />
 
 </RelativeLayout>
