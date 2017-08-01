@@ -1,8 +1,8 @@
 package krabcode.fuel;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -15,14 +15,25 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //MAIN ACTIVITY
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -38,11 +49,12 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
+    private FuelstampController fuelstampController;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
@@ -56,15 +68,11 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
+        if(fuelstampController == null)
+        {
+            fuelstampController = new FuelstampController();
+            fuelstampController.load();
+        }
     }
 
 
@@ -89,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //INPUT FORM
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -119,44 +128,201 @@ public class MainActivity extends AppCompatActivity {
                                  Bundle savedInstanceState) {
             final View rootView = inflater.inflate(R.layout.fragment_form, container, false);
 
-            EditText viewEditLitres = (EditText) rootView.findViewById(R.id.editText_litres);
-            viewEditLitres.setOnKeyListener(new View.OnKeyListener() {
+            EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
+            editLitres.setOnTouchListener(new View.OnTouchListener() {
                 @Override
-                public boolean onKey(View v, int keyCode, KeyEvent event) {
-                    updateCostPerLitre(rootView);
+                public boolean onTouch(View v, MotionEvent event) {
+                    autocompleteEmptyField(rootView);
                     return false;
                 }
             });
 
-            EditText viewTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
-            viewTotalCost.setOnKeyListener(new View.OnKeyListener() {
+            EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
+            editTotalCost.setOnTouchListener(new View.OnTouchListener() {
                 @Override
-                public boolean onKey(View v, int keyCode, KeyEvent event) {
-                    updateCostPerLitre(rootView);
+                public boolean onTouch(View v, MotionEvent event) {
+                    autocompleteEmptyField(rootView);
                     return false;
+                }
+            });
+
+            EditText editCostPerLitre = (EditText) rootView.findViewById(R.id.editText_costPerLitre);
+            editCostPerLitre.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    autocompleteEmptyField(rootView);
+                    return false;
+                }
+            });
+
+            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
+            SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
+            editDate.setText(sdf.format(Calendar.getInstance().getTime()));
+
+            Button buttonSave = (Button) rootView.findViewById(R.id.button_save);
+            buttonSave.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    if(validateForm(rootView))
+                    submitForm(rootView);
+                }
+            });
+
+            Button buttonClear = (Button) rootView.findViewById(R.id.button_clear);
+            buttonClear.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    new AlertDialog.Builder(rootView.getContext())
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setTitle(R.string.clear_alert_title)
+                            .setMessage(R.string.really_clear)
+                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    clearForm(rootView);
+                                }
+
+                            })
+                            .setNegativeButton(R.string.no, null)
+                            .show();
+
                 }
             });
 
             return rootView;
         }
-    }
 
-    private static void updateCostPerLitre(View rootView)
-    {
-        EditText viewEditLitres = (EditText) rootView.findViewById(R.id.editText_litres);
-        EditText viewTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
-        TextView textView_costPerLitre = (TextView) rootView.findViewById(R.id.textView_costPerLitre);
-        try{
-            float litres =  Float.parseFloat(viewEditLitres.getText().toString());
-            float totalCost = Float.parseFloat(viewTotalCost.getText().toString());
-            float costPerLitre = totalCost / litres;
-            String costPerLitreText = new StringBuilder().append(rootView.getResources().getString(R.string.form_title_4)).append(costPerLitre).toString();
-            textView_costPerLitre.setText(costPerLitreText);
-        }catch(Exception e)
+        private void clearForm(View rootView) {
+            EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
+            EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
+            EditText editCostPerLitre = (EditText) rootView.findViewById(R.id.editText_costPerLitre);
+            EditText editKm = (EditText) rootView.findViewById(R.id.editText_km);
+            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
+
+            editLitres.setText("");
+            editTotalCost.setText("");
+            editCostPerLitre.setText("");
+            editKm.setText("");
+            editDate.setText("");
+        }
+
+        private void submitForm(View rootView) {
+            EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
+            EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
+            EditText editCostPerLitre = (EditText) rootView.findViewById(R.id.editText_costPerLitre);
+            EditText editKm = (EditText) rootView.findViewById(R.id.editText_km);
+            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
+        }
+
+        private boolean validateForm(View rootView) {
+            boolean success = true;
+            EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
+            EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
+            EditText editKm = (EditText) rootView.findViewById(R.id.editText_km);
+            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
+
+            float litres = 0;
+            float totalCost = 0;
+            float km = 0;
+            Date date;
+
+            try{
+                litres = Float.parseFloat(editLitres.getText().toString());
+            }catch (Exception ex){
+                Toast.makeText(rootView.getContext(), R.string.parseError_litres, Toast.LENGTH_SHORT).show();
+                success = false;
+            }
+            try{
+                totalCost = Float.parseFloat(editTotalCost.getText().toString());
+            }catch (Exception ex){
+                Toast.makeText(rootView.getContext(), R.string.parseError_total, Toast.LENGTH_SHORT).show();
+                success = false;
+            }
+            try{
+                km = Float.parseFloat(editKm.getText().toString());
+            }catch (Exception ex){
+                Toast.makeText(rootView.getContext(), R.string.parseError_km, Toast.LENGTH_SHORT).show();
+                success = false;
+            }
+            try{
+                DateFormat df = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
+                date =  df.parse(editDate.getText().toString());
+            }catch (Exception ex){
+                Toast.makeText(rootView.getContext(), R.string.parseError_date, Toast.LENGTH_SHORT).show();
+                success = false;
+            }
+            return success;
+        }
+
+        private static void autocompleteEmptyField(View rootView)
         {
+            EditText viewLitres = (EditText) rootView.findViewById(R.id.editText_litres);
+            EditText viewTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
+            EditText viewCostPerLitre = (EditText) rootView.findViewById(R.id.editText_costPerLitre);
 
+            String litres = viewLitres.getText().toString();
+            String total = viewTotalCost.getText().toString();
+            String costPerLitre = viewCostPerLitre.getText().toString();
+
+            if(isOneValueEmpty(litres, total, costPerLitre))
+            {
+                if(litres.equals("") && viewLitres.isFocused()){
+                    //complete missing litres value
+                    try{
+                        float f_total = Float.parseFloat(total);
+                        float f_costPerLitre = Float.parseFloat(costPerLitre);
+                        viewLitres.setText(new StringBuilder().append(f_total/f_costPerLitre));
+                    }catch(Exception ex){
+                        Toast.makeText(rootView.getContext(), R.string.parseError_1, Toast.LENGTH_SHORT).show();
+                    }
+                }else if(total.equals("") && viewTotalCost.isFocused()){
+                    //complete missing total value
+                    try{
+                        float f_litres = Float.parseFloat(litres);
+                        float f_costPerLitre = Float.parseFloat(costPerLitre);
+                        viewTotalCost.setText(new StringBuilder().append(f_litres*f_costPerLitre));
+                    }catch(Exception ex){
+                        Toast.makeText(rootView.getContext(), R.string.parseError_2, Toast.LENGTH_SHORT).show();
+                    }
+                }else if(costPerLitre.equals("") && viewCostPerLitre.isFocused()){
+                    //complete missing costPerLitre value
+                    try{
+                        float f_litres = Float.parseFloat(litres);
+                        float f_total = Float.parseFloat(total);
+                        viewCostPerLitre.setText(new StringBuilder().append(f_total/f_litres));
+                    }catch(Exception ex){
+                        Toast.makeText(rootView.getContext(), R.string.parseError_3, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        }
+
+        public static boolean isOneValueEmpty(String value1, String value2, String value3)
+        {
+            int notEmptyCount = 0;
+            if(value1.equals(""))
+            {
+                notEmptyCount++;
+            }
+            if(value2.equals(""))
+            {
+                notEmptyCount++;
+            }
+            if(value3.equals(""))
+            {
+                notEmptyCount++;
+            }
+            if(notEmptyCount == 1)
+            {
+                return true;
+            }
+            return false;
         }
     }
+
+
+
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //LOG
@@ -263,11 +429,11 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "New";
+                    return "nový";
                 case 1:
-                    return "Log";
+                    return "starý";
                 case 2:
-                    return "Analytics";
+                    return "grafy";
             }
             return null;
         }
