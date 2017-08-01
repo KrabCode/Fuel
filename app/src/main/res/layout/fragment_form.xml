@@ -30,10 +30,11 @@
         android:id="@+id/checkBox_full"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
         android:checked="true"
         android:text="@string/form_title_2"
-        android:layout_alignTop="@+id/editText_litres"
+        android:layout_alignBaseline="@+id/editText_litres"
+        android:layout_alignBottom="@+id/editText_litres"
+        android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/editText_litres" />
 
     <TextView
@@ -66,10 +67,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/editText_cost"
-        android:layout_alignEnd="@+id/checkBox_full"
-        android:layout_alignStart="@+id/textView_costPerLitre"
         android:ems="10"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/editText_cost" />
 
     <TextView
         android:id="@+id/textView_kilometrage"
@@ -100,28 +101,28 @@
         android:id="@+id/editText_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView_date"
-        android:layout_toStartOf="@+id/checkBox_full"
         android:ems="10"
-        android:inputType="date" />
+        android:inputType="date"
+        android:layout_below="@+id/textView_date"
+        android:layout_alignParentStart="true" />
 
     <Button
         android:id="@+id/button_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/save"
-        android:layout_below="@+id/editText_date"
+        android:layout_alignBaseline="@+id/button_clear"
+        android:layout_alignBottom="@+id/button_clear"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="94dp"
-        android:layout_toEndOf="@+id/textView_liters" />
+        android:layout_toEndOf="@+id/button_clear" />
 
     <Button
         android:id="@+id/button_clear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/yes"
-        android:layout_alignBaseline="@+id/button_save"
-        android:layout_alignBottom="@+id/button_save"
-        android:layout_alignParentStart="true" />
+        android:layout_below="@+id/editText_date"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="83dp" />
 
 </RelativeLayout>

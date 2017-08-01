@@ -11,7 +11,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -129,29 +128,26 @@ public class MainActivity extends AppCompatActivity {
             final View rootView = inflater.inflate(R.layout.fragment_form, container, false);
 
             EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
-            editLitres.setOnTouchListener(new View.OnTouchListener() {
+            editLitres.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
-                public boolean onTouch(View v, MotionEvent event) {
+                public void onFocusChange(View v, boolean hasFocus) {
                     autocompleteEmptyField(rootView);
-                    return false;
                 }
             });
 
             EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
-            editTotalCost.setOnTouchListener(new View.OnTouchListener() {
+            editTotalCost.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
-                public boolean onTouch(View v, MotionEvent event) {
+                public void onFocusChange(View v, boolean hasFocus) {
                     autocompleteEmptyField(rootView);
-                    return false;
                 }
             });
 
             EditText editCostPerLitre = (EditText) rootView.findViewById(R.id.editText_costPerLitre);
-            editCostPerLitre.setOnTouchListener(new View.OnTouchListener() {
+            editCostPerLitre.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
-                public boolean onTouch(View v, MotionEvent event) {
+                public void onFocusChange(View v, boolean hasFocus) {
                     autocompleteEmptyField(rootView);
-                    return false;
                 }
             });
 
@@ -300,20 +296,20 @@ public class MainActivity extends AppCompatActivity {
 
         public static boolean isOneValueEmpty(String value1, String value2, String value3)
         {
-            int notEmptyCount = 0;
+            int emptyCount = 0;
             if(value1.equals(""))
             {
-                notEmptyCount++;
+                emptyCount++;
             }
             if(value2.equals(""))
             {
-                notEmptyCount++;
+                emptyCount++;
             }
             if(value3.equals(""))
             {
-                notEmptyCount++;
+                emptyCount++;
             }
-            if(notEmptyCount == 1)
+            if(emptyCount == 1)
             {
                 return true;
             }
@@ -429,11 +425,11 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "nový";
+                    return getString(R.string.title_page_1);
                 case 1:
-                    return "starý";
+                    return getString(R.string.title_page_2);
                 case 2:
-                    return "grafy";
+                    return getString(R.string.title_page_3);
             }
             return null;
         }

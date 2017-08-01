@@ -2,11 +2,11 @@
     <string name="app_name">Fuel</string>
     <string name="action_settings">Settings</string>
 
-    <string name="form_title_1">litrů natankoval</string>
-    <string name="form_title_2">plnou nádrž</string>
-    <string name="form_title_3">peněz zaplatil</string>
+    <string name="form_title_1">litrů</string>
+    <string name="form_title_2">plnou</string>
+    <string name="form_title_3">cena</string>
     <string name="form_title_4">za litr</string>
-    <string name="form_title_5">km ujel</string>
+    <string name="form_title_5">tachometr</string>
     <string name="form_title_6">dne</string>
 
     <string name="clear">smazat</string>
@@ -26,4 +26,8 @@
     <string name="parseError_km">Unable to parse km</string>
     <string name="default_date_format">dd.MM.yyyy</string>
     <string name="parseError_date">Unable to parse date</string>
+
+    <string name="title_page_1">Zapsat</string>
+    <string name="title_page_2">Historie</string>
+    <string name="title_page_3">Analýza</string>
 </resources>
