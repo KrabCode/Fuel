@@ -41,9 +41,10 @@
         android:id="@+id/textView_cost"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
+        android:text="@string/form_title_3"
+        android:layout_marginTop="15dp"
         android:layout_below="@+id/editText_litres"
-        android:text="@string/form_title_3" />
+        android:layout_alignParentStart="true" />
 
     <EditText
         android:id="@+id/editText_cost"
@@ -59,8 +60,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/form_title_4"
-        android:layout_below="@+id/editText_litres"
-        android:layout_alignStart="@+id/checkBox_full" />
+        android:layout_above="@+id/editText_cost"
+        android:layout_toEndOf="@+id/editText_cost"
+        android:layout_alignTop="@+id/textView_cost" />
 
     <EditText
         android:id="@+id/editText_costPerLitre"
@@ -76,9 +78,10 @@
         android:id="@+id/textView_kilometrage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
+        android:text="@string/form_title_5"
+        android:layout_marginTop="15dp"
         android:layout_below="@+id/editText_cost"
-        android:text="@string/form_title_5" />
+        android:layout_alignParentStart="true" />
 
     <EditText
         android:id="@+id/editText_km"
@@ -93,9 +96,10 @@
         android:id="@+id/textView_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
+        android:text="@string/form_title_6"
+        android:layout_marginTop="15dp"
         android:layout_below="@+id/editText_km"
-        android:text="@string/form_title_6" />
+        android:layout_alignParentStart="true" />
 
     <EditText
         android:id="@+id/editText_date"
@@ -121,8 +125,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/yes"
+        android:layout_marginTop="30dp"
         android:layout_below="@+id/editText_date"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="83dp" />
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

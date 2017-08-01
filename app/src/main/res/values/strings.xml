@@ -27,7 +27,10 @@
     <string name="default_date_format">dd.MM.yyyy</string>
     <string name="parseError_date">Unable to parse date</string>
 
-    <string name="title_page_1">Zapsat</string>
-    <string name="title_page_2">Historie</string>
-    <string name="title_page_3">Analýza</string>
+    <string name="title_page_1">zapsat</string>
+    <string name="title_page_2">historie</string>
+    <string name="title_page_3">analýza</string>
+    <string name="SharedPreferences_savedFuelstampsKey">krabcode.fuel.fuelstamps</string>
+    <string name="save_success_message">uloženo úspěšně</string>
+    <string name="save_failure_message">uložení selhalo</string>
 </resources>

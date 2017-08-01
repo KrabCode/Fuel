@@ -1,6 +1,7 @@
 package krabcode.fuel;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +15,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -66,12 +67,6 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-
-        if(fuelstampController == null)
-        {
-            fuelstampController = new FuelstampController();
-            fuelstampController.load();
-        }
     }
 
 
@@ -123,10 +118,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             final View rootView = inflater.inflate(R.layout.fragment_form, container, false);
 
+            //hook up the autocomplete
             EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
             editLitres.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
@@ -134,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
                     autocompleteEmptyField(rootView);
                 }
             });
-
             EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
             editTotalCost.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
@@ -142,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
                     autocompleteEmptyField(rootView);
                 }
             });
-
             EditText editCostPerLitre = (EditText) rootView.findViewById(R.id.editText_costPerLitre);
             editCostPerLitre.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
@@ -151,16 +144,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            //fill today's date in the date field
             EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
             SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
             editDate.setText(sdf.format(Calendar.getInstance().getTime()));
 
+            //hook buttons up to methods
             Button buttonSave = (Button) rootView.findViewById(R.id.button_save);
             buttonSave.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
+                    //error messages are printed in the validateForm method
                     if(validateForm(rootView))
-                    submitForm(rootView);
+                    {
+                        submitForm(rootView);
+                    }
                 }
             });
 
@@ -182,14 +180,13 @@ public class MainActivity extends AppCompatActivity {
                             })
                             .setNegativeButton(R.string.no, null)
                             .show();
-
                 }
             });
 
             return rootView;
         }
 
-        private void clearForm(View rootView) {
+        private void clearForm(View rootView){
             EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
             EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
             EditText editCostPerLitre = (EditText) rootView.findViewById(R.id.editText_costPerLitre);
@@ -203,16 +200,38 @@ public class MainActivity extends AppCompatActivity {
             editDate.setText("");
         }
 
-        private void submitForm(View rootView) {
+        private void submitForm(View rootView){
+            //parse the input
             EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
             EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
-            EditText editCostPerLitre = (EditText) rootView.findViewById(R.id.editText_costPerLitre);
             EditText editKm = (EditText) rootView.findViewById(R.id.editText_km);
             EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
+
+            float litres = Float.parseFloat(editLitres.getText().toString());
+            float totalCost = Float.parseFloat(editTotalCost.getText().toString());
+            float km = Float.parseFloat(editKm.getText().toString());
+            DateFormat df = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
+            try {
+                Date date =  df.parse(editDate.getText().toString());
+                //all the data in to the main list in a Fuelstamp object
+                FuelstampController controller = FuelstampController.getInstance(getActivity().getApplication());
+                boolean saveSuccess = controller.add(litres,totalCost, km, date);
+                if(saveSuccess)
+                {
+                    Toast.makeText(rootView.getContext(), R.string.save_success_message, Toast.LENGTH_SHORT).show();
+                    clearForm(rootView);
+                }else{
+                    Toast.makeText(rootView.getContext(), R.string.save_failure_message, Toast.LENGTH_SHORT).show();
+                }
+            } catch (ParseException e) {
+                //if the date is validated this exception will never happen
+                e.printStackTrace();
+            }
         }
 
-        private boolean validateForm(View rootView) {
-            boolean success = true;
+        private boolean validateForm(View rootView){
+            boolean success = true;  //will try to disprove this assumption
+
             EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
             EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
             EditText editKm = (EditText) rootView.findViewById(R.id.editText_km);
@@ -251,8 +270,7 @@ public class MainActivity extends AppCompatActivity {
             return success;
         }
 
-        private static void autocompleteEmptyField(View rootView)
-        {
+        private static void autocompleteEmptyField(View rootView){
             EditText viewLitres = (EditText) rootView.findViewById(R.id.editText_litres);
             EditText viewTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
             EditText viewCostPerLitre = (EditText) rootView.findViewById(R.id.editText_costPerLitre);
@@ -261,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
             String total = viewTotalCost.getText().toString();
             String costPerLitre = viewCostPerLitre.getText().toString();
 
-            if(isOneValueEmpty(litres, total, costPerLitre))
+            if(isOneOfTheseAnEmptyString(litres, total, costPerLitre))
             {
                 if(litres.equals("") && viewLitres.isFocused()){
                     //complete missing litres value
@@ -294,8 +312,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        public static boolean isOneValueEmpty(String value1, String value2, String value3)
-        {
+        public static boolean isOneOfTheseAnEmptyString(String value1, String value2, String value3){
             int emptyCount = 0;
             if(value1.equals(""))
             {
@@ -321,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //LOG
+    //BACKLOG
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public static class LogFragment extends Fragment {
         /**
@@ -349,6 +366,7 @@ public class MainActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_log, container, false);
+            FuelstampController.getInstance(getContext());
             return rootView;
         }
     }

@@ -1,36 +1,52 @@
 package krabcode.fuel;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 
+import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.view.View;
-import org.json.*;
+
+import com.google.gson.*;
 
 /**
+ * Class for providing the interface for the gui to manipulate the data in the "fuelstamps" list of submitted form entries
+ *
  * Created by Jakub on 1. 8. 2017.
  */
 
 public class FuelstampController {
 
+    //the only important object in this class
     private ArrayList<Fuelstamp> fuelstamps;
 
-
+    private Context context;
 
     private static FuelstampController mInstance= null;
 
     protected FuelstampController(){}
 
-    public static synchronized FuelstampController getInstance(){
-        if(null == mInstance){
+    public static synchronized FuelstampController getInstance(Context context){
+        if(mInstance == null){
             mInstance = new FuelstampController();
-            mInstance.load();
+            mInstance.context = context;
+            mInstance.loadFuelstampsFromSavedPreferences();
         }
         return mInstance;
     }
 
-    public void add(float litres, float cost, float km, Date date)
+    /**
+     *
+     * @param litres
+     * @param cost
+     * @param km
+     * @param date
+     * @return whether save succeeded
+     */
+    public boolean add(float litres, float cost, float km, Date date)
     {
         Fuelstamp fuelstamp = new Fuelstamp();
         fuelstamp.litres = litres;
@@ -39,11 +55,11 @@ public class FuelstampController {
         fuelstamp.date = date;
         fuelstamp.id = generateUniqueId();
         fuelstamps.add(fuelstamp);
-        save();
+        return save();
     }
 
     private String generateUniqueId() {
-        String newId = "";
+        String newId;
         Random rand = new Random();
         do{
             int n = rand.nextInt(50) + 1;
@@ -66,16 +82,56 @@ public class FuelstampController {
 
     public void remove(String id)
     {
-
+        Fuelstamp deadStamp = null;
+        for(Fuelstamp liveStamp : fuelstamps)
+        {
+            if(liveStamp.id.equals(id))
+            {
+                deadStamp = liveStamp;
+            }
+        }
+        if(deadStamp != null)
+        {
+            // Nick Cave & The Bad Seeds - The Mercy Seat
+            // https://www.youtube.com/watch?v=Ahr4KFl79WI
+            fuelstamps.remove(deadStamp);
+        }
     }
 
-    public void load()
+    private void loadFuelstampsFromSavedPreferences()
     {
-        //PreferenceManager.getDefaultSharedPreferences(rootView.getContext());
+        fuelstamps = new ArrayList<Fuelstamp>();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        String json = (String)settings.getAll().get(R.string.SharedPreferences_savedFuelstampsKey);
+        FuelstampJsonReference parsedFuelstampList = new Gson().fromJson(json, FuelstampJsonReference.class);
+        if(parsedFuelstampList != null)
+        {
+            for(Fuelstamp stamp : parsedFuelstampList.fuelstampList)
+            {
+                fuelstamps.add(stamp);
+            }
+        }
+
+
     }
 
-    public void save()
+    /**
+     * @return whether save succeeded
+     */
+    private boolean save()
     {
-
+        boolean success = true;
+        try{
+        String json = new Gson().toJson(fuelstamps);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        settings.edit().putString(context.getString(R.string.SharedPreferences_savedFuelstampsKey), json);
+        settings.edit().apply();
+        }catch (Exception ex)
+        {
+            success = false;
+            ex.printStackTrace();
+        }
+        return success;
     }
+
 }
