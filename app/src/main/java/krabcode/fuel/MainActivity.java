@@ -1,7 +1,6 @@
 package krabcode.fuel;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -20,11 +19,13 @@ import android.view.ViewGroup;
 
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -144,11 +145,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            //fill today's date in the date field
-            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
-            SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
-            editDate.setText(sdf.format(Calendar.getInstance().getTime()));
-
             //hook buttons up to methods
             Button buttonSave = (Button) rootView.findViewById(R.id.button_save);
             buttonSave.setOnClickListener(new View.OnClickListener(){
@@ -183,7 +179,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            //fill today's date in the date field
+            setEditDateTextToToday(rootView);
+
             return rootView;
+        }
+
+        private void setEditDateTextToToday(View rootView)
+        {
+            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
+            SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
+            editDate.setText(sdf.format(Calendar.getInstance().getTime()));
         }
 
         private void clearForm(View rootView){
@@ -197,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
             editTotalCost.setText("");
             editCostPerLitre.setText("");
             editKm.setText("");
-            editDate.setText("");
+            setEditDateTextToToday(rootView);
         }
 
         private void submitForm(View rootView){
@@ -367,7 +373,15 @@ public class MainActivity extends AppCompatActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_log, container, false);
             FuelstampController.getInstance(getContext());
+            repopulate(rootView);
             return rootView;
+        }
+
+        public void repopulate(View rootView)
+        {
+            ArrayList<Fuelstamp> fuelstamps = FuelstampController.getInstance(getContext()).getFuelstamps();
+            TextView textView = (TextView)rootView.findViewById(R.id.log_title);
+            textView.setText("known items: " + fuelstamps.size());
         }
     }
 

@@ -62,7 +62,7 @@ public class FuelstampController {
         String newId;
         Random rand = new Random();
         do{
-            int n = rand.nextInt(50) + 1;
+            int n = rand.nextInt(Integer.MAX_VALUE);
             newId = "" + n;
         }while(getFuelstampById(newId) != null);
         return newId;
@@ -78,6 +78,11 @@ public class FuelstampController {
             }
         }
         return null;
+    }
+
+    public ArrayList<Fuelstamp> getFuelstamps()
+    {
+        return fuelstamps;
     }
 
     public void remove(String id)
@@ -102,7 +107,7 @@ public class FuelstampController {
     {
         fuelstamps = new ArrayList<Fuelstamp>();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String json = (String)settings.getAll().get(R.string.SharedPreferences_savedFuelstampsKey);
+        String json = (String)settings.getString(context.getString(R.string.SharedPreferences_savedFuelstampsKey), null);
         FuelstampJsonReference parsedFuelstampList = new Gson().fromJson(json, FuelstampJsonReference.class);
         if(parsedFuelstampList != null)
         {
