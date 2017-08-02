@@ -10,9 +10,9 @@
     <string name="form_title_6">dne</string>
 
     <string name="clear">smazat</string>
-    <string name="clear_alert_title">bacha</string>
+    <string name="clear_alert_title">smazat formulář?</string>
     <string name="save">zapsat</string>
-    <string name="really_clear">fakt smazat?</string>
+    <string name="really_clear">smazat?</string>
     <string name="yes">smazat</string>
     <string name="no">ne</string>
 
@@ -20,12 +20,12 @@
     <string name="parseError_2">Unable to parse litres or cost per litre</string>
     <string name="parseError_3">Unable to parse litres or total cost</string>
 
-    <string name="parseError_litres">Unable to parse litres</string>
-    <string name="parseError_total">Unable to parse total</string>
-    <string name="parseError_costPerLitre">Unable to parse cost per litre</string>
-    <string name="parseError_km">Unable to parse km</string>
+    <string name="parseError_litres">nerozumím počtu litrů</string>
+    <string name="parseError_total">nerozumím ceně</string>
+    <string name="parseError_costPerLitre">nerozumím ceně za litr</string>
+    <string name="parseError_km">nerozumím zápisu kilometrů</string>
     <string name="default_date_format">dd.MM.yyyy</string>
-    <string name="parseError_date">Unable to parse date</string>
+    <string name="parseError_date">nerozumím dni, očekávám formát: 01.01.2001 </string>
 
     <string name="title_page_1">zapsat</string>
     <string name="title_page_2">historie</string>
@@ -33,4 +33,6 @@
     <string name="SharedPreferences_savedFuelstampsKey">krabcode.fuel.fuelstamps</string>
     <string name="save_success_message">uloženo úspěšně</string>
     <string name="save_failure_message">uložení selhalo</string>
+    <string name="delete_entry_dialog_title">smazat záznam?\n</string>
+    <string name="graph_efficiency_title">průměrná spotřeba na 100km</string>
 </resources>

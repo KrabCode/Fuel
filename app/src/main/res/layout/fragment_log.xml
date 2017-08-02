@@ -8,21 +8,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="krabcode.fuel.MainActivity$LogFragment">
 
-    <TextView
-        android:id="@+id/log_title"
-        android:text="Log"
-        android:layout_width="wrap_content"
+    <ListView
+        android:id="@+id/listView_fuelstamp_history"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAllCaps="true"/>
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="114dp"
-        android:text="Button"
-        android:layout_below="@+id/log_title"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
 
 
 </RelativeLayout>

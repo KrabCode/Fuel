@@ -17,12 +17,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.jjoe64.graphview.DefaultLabelFormatter;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-
-    private FuelstampController fuelstampController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
                     new AlertDialog.Builder(rootView.getContext())
                             .setIcon(android.R.drawable.ic_dialog_alert)
                             .setTitle(R.string.clear_alert_title)
-                            .setMessage(R.string.really_clear)
                             .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
                                 @Override
@@ -185,19 +193,11 @@ public class MainActivity extends AppCompatActivity {
             return rootView;
         }
 
-        private void setEditDateTextToToday(View rootView)
-        {
-            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
-            SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
-            editDate.setText(sdf.format(Calendar.getInstance().getTime()));
-        }
-
         private void clearForm(View rootView){
             EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
             EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
             EditText editCostPerLitre = (EditText) rootView.findViewById(R.id.editText_costPerLitre);
             EditText editKm = (EditText) rootView.findViewById(R.id.editText_km);
-            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
 
             editLitres.setText("");
             editTotalCost.setText("");
@@ -206,26 +206,74 @@ public class MainActivity extends AppCompatActivity {
             setEditDateTextToToday(rootView);
         }
 
+        private void setEditDateTextToToday(View rootView)
+        {
+            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
+            SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
+            editDate.setText(sdf.format(Calendar.getInstance().getTime()));
+        }
+
+        private boolean validateForm(View rootView){
+            EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
+            EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
+            EditText editKm = (EditText) rootView.findViewById(R.id.editText_km);
+            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
+            try{
+                float litres = Float.parseFloat(editLitres.getText().toString());
+            }catch (Exception ex){
+                Toast.makeText(rootView.getContext(), R.string.parseError_litres, Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            try{
+                float totalCost = Float.parseFloat(editTotalCost.getText().toString());
+            }catch (Exception ex){
+                Toast.makeText(rootView.getContext(), R.string.parseError_total, Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            try{
+                float km = Float.parseFloat(editKm.getText().toString());
+            }catch (Exception ex){
+                Toast.makeText(rootView.getContext(), R.string.parseError_km, Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            try{
+                DateFormat df = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
+                Date date =  df.parse(editDate.getText().toString());
+            }catch (Exception ex){
+                Toast.makeText(rootView.getContext(), R.string.parseError_date, Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * call validateForm first before calling this
+         * @param rootView
+         */
         private void submitForm(View rootView){
             //parse the input
             EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
             EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
             EditText editKm = (EditText) rootView.findViewById(R.id.editText_km);
             EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
+            CheckBox checkFull = (CheckBox) rootView.findViewById(R.id.checkBox_full);
 
             float litres = Float.parseFloat(editLitres.getText().toString());
             float totalCost = Float.parseFloat(editTotalCost.getText().toString());
             float km = Float.parseFloat(editKm.getText().toString());
+            boolean full = checkFull.isChecked();
             DateFormat df = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
             try {
                 Date date =  df.parse(editDate.getText().toString());
                 //all the data in to the main list in a Fuelstamp object
                 FuelstampController controller = FuelstampController.getInstance(getActivity().getApplication());
-                boolean saveSuccess = controller.add(litres,totalCost, km, date);
+                boolean saveSuccess = controller.add(litres,totalCost, km, date, full);
                 if(saveSuccess)
                 {
                     Toast.makeText(rootView.getContext(), R.string.save_success_message, Toast.LENGTH_SHORT).show();
                     clearForm(rootView);
+                    //notify the log that its data set changed
+                    ((ArrayAdapter)((ListView) getActivity().findViewById(R.id.listView_fuelstamp_history)).getAdapter()).notifyDataSetChanged();
                 }else{
                     Toast.makeText(rootView.getContext(), R.string.save_failure_message, Toast.LENGTH_SHORT).show();
                 }
@@ -233,47 +281,6 @@ public class MainActivity extends AppCompatActivity {
                 //if the date is validated this exception will never happen
                 e.printStackTrace();
             }
-        }
-
-        private boolean validateForm(View rootView){
-            boolean success = true;  //will try to disprove this assumption
-
-            EditText editLitres = (EditText) rootView.findViewById(R.id.editText_litres);
-            EditText editTotalCost = (EditText) rootView.findViewById(R.id.editText_cost);
-            EditText editKm = (EditText) rootView.findViewById(R.id.editText_km);
-            EditText editDate = (EditText) rootView.findViewById(R.id.editText_date);
-
-            float litres = 0;
-            float totalCost = 0;
-            float km = 0;
-            Date date;
-
-            try{
-                litres = Float.parseFloat(editLitres.getText().toString());
-            }catch (Exception ex){
-                Toast.makeText(rootView.getContext(), R.string.parseError_litres, Toast.LENGTH_SHORT).show();
-                success = false;
-            }
-            try{
-                totalCost = Float.parseFloat(editTotalCost.getText().toString());
-            }catch (Exception ex){
-                Toast.makeText(rootView.getContext(), R.string.parseError_total, Toast.LENGTH_SHORT).show();
-                success = false;
-            }
-            try{
-                km = Float.parseFloat(editKm.getText().toString());
-            }catch (Exception ex){
-                Toast.makeText(rootView.getContext(), R.string.parseError_km, Toast.LENGTH_SHORT).show();
-                success = false;
-            }
-            try{
-                DateFormat df = new SimpleDateFormat(getString(R.string.default_date_format), Locale.ENGLISH);
-                date =  df.parse(editDate.getText().toString());
-            }catch (Exception ex){
-                Toast.makeText(rootView.getContext(), R.string.parseError_date, Toast.LENGTH_SHORT).show();
-                success = false;
-            }
-            return success;
         }
 
         private static void autocompleteEmptyField(View rootView){
@@ -284,6 +291,7 @@ public class MainActivity extends AppCompatActivity {
             String litres = viewLitres.getText().toString();
             String total = viewTotalCost.getText().toString();
             String costPerLitre = viewCostPerLitre.getText().toString();
+            DecimalFormat df = new DecimalFormat("#.##");
 
             if(isOneOfTheseAnEmptyString(litres, total, costPerLitre))
             {
@@ -292,7 +300,8 @@ public class MainActivity extends AppCompatActivity {
                     try{
                         float f_total = Float.parseFloat(total);
                         float f_costPerLitre = Float.parseFloat(costPerLitre);
-                        viewLitres.setText(new StringBuilder().append(f_total/f_costPerLitre));
+                        float result = f_total / f_costPerLitre;
+                        viewLitres.setText(df.format(result));
                     }catch(Exception ex){
                         Toast.makeText(rootView.getContext(), R.string.parseError_1, Toast.LENGTH_SHORT).show();
                     }
@@ -301,7 +310,8 @@ public class MainActivity extends AppCompatActivity {
                     try{
                         float f_litres = Float.parseFloat(litres);
                         float f_costPerLitre = Float.parseFloat(costPerLitre);
-                        viewTotalCost.setText(new StringBuilder().append(f_litres*f_costPerLitre));
+                        float result = (f_litres * f_costPerLitre);
+                        viewTotalCost.setText(df.format(result));
                     }catch(Exception ex){
                         Toast.makeText(rootView.getContext(), R.string.parseError_2, Toast.LENGTH_SHORT).show();
                     }
@@ -310,7 +320,8 @@ public class MainActivity extends AppCompatActivity {
                     try{
                         float f_litres = Float.parseFloat(litres);
                         float f_total = Float.parseFloat(total);
-                        viewCostPerLitre.setText(new StringBuilder().append(f_total/f_litres));
+                        float result = f_total/f_litres;
+                        viewCostPerLitre.setText(df.format(result));
                     }catch(Exception ex){
                         Toast.makeText(rootView.getContext(), R.string.parseError_3, Toast.LENGTH_SHORT).show();
                     }
@@ -340,9 +351,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
-
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //BACKLOG
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -371,28 +379,39 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_log, container, false);
-            FuelstampController.getInstance(getContext());
+            final View rootView = inflater.inflate(R.layout.fragment_log, container, false);
 
-            //test
-            Button button = (Button) rootView.findViewById(R.id.button);
-            button.setOnClickListener(new View.OnClickListener() {
-                  @Override
-                  public void onClick(View v) {
-                      repopulate(v);
-                  }
-              }
-            );
+            ListView log = (ListView) rootView.findViewById(R.id.listView_fuelstamp_history);
+            final ArrayList<Fuelstamp> fuelstamps = FuelstampController.getInstance(rootView.getContext()).getFuelstamps();
+            if(fuelstamps!= null)
+            {
+                final ArrayAdapter<Fuelstamp> adapter = new ArrayAdapter<Fuelstamp>(rootView.getContext(), R.layout.simple_list_item, fuelstamps);
+                log.setAdapter(adapter);
+                log.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        final Fuelstamp selectedFuelstamp = FuelstampController.getInstance(rootView.getContext()).getFuelstamps().get(position);
+                        if(selectedFuelstamp != null)
+                        {
+                            new AlertDialog.Builder(rootView.getContext())
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .setTitle(R.string.delete_entry_dialog_title)
+                                    .setMessage(selectedFuelstamp.toString())
+                                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            FuelstampController.getInstance(rootView.getContext()).remove(selectedFuelstamp.id);
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    })
+                                    .setNegativeButton(R.string.no, null)
+                                    .show();
+                        }
+                    }
+                });
+            }
 
-            repopulate(rootView);
             return rootView;
-        }
-
-        public void repopulate(View rootView)
-        {
-            ArrayList<Fuelstamp> fuelstamps = FuelstampController.getInstance(getContext()).getFuelstamps();
-            TextView textView = (TextView)rootView.findViewById(R.id.log_title);
-            textView.setText("known items: " + fuelstamps.size());
         }
     }
 
@@ -424,10 +443,33 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_analytics, container, false);
+            final View rootView = inflater.inflate(R.layout.fragment_analytics, container, false);
+            GraphView efficiency = (GraphView) rootView.findViewById(R.id.graph_efficiency);
+            efficiency.setTitle(getString(R.string.graph_efficiency_title));
+            efficiency.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getActivity()));
+            efficiency.getGridLabelRenderer().setNumHorizontalLabels(3); // only 4 because of the space
+            populateEfficiency(rootView);
             return rootView;
         }
+
+        private void populateEfficiency(View rootView)
+        {
+            DataPoint[] efficiencyDataPoints = FuelstampController.getInstance(rootView.getContext()).getEfficiencyDataPoints();
+            if(efficiencyDataPoints.length > 0)
+            {
+                LineGraphSeries<DataPoint> series = new LineGraphSeries<>(efficiencyDataPoints);
+
+                GraphView efficiency = (GraphView) rootView.findViewById(R.id.graph_efficiency);
+                efficiency.removeAllSeries();
+                efficiency.addSeries(series);
+                // set manual x bounds to have nice steps
+                efficiency.getViewport().setMinX( efficiencyDataPoints[0].getX());
+                efficiency.getViewport().setMaxX( efficiencyDataPoints[efficiencyDataPoints.length-1].getX());
+                efficiency.getViewport().setXAxisBoundsManual(true);
+            }
+        }
     }
+
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
