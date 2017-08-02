@@ -8,5 +8,5 @@ import java.util.List;
  */
 
 public class FuelstampJsonReference {
-    List<Fuelstamp> fuelstampList;
+    public List<Fuelstamp> fuelstampList;
 }

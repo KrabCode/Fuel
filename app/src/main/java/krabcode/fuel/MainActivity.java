@@ -373,6 +373,17 @@ public class MainActivity extends AppCompatActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_log, container, false);
             FuelstampController.getInstance(getContext());
+
+            //test
+            Button button = (Button) rootView.findViewById(R.id.button);
+            button.setOnClickListener(new View.OnClickListener() {
+                  @Override
+                  public void onClick(View v) {
+                      repopulate(v);
+                  }
+              }
+            );
+
             repopulate(rootView);
             return rootView;
         }

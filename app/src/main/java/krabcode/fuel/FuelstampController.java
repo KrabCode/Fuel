@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Class for providing the interface for the gui to manipulate the data in the "fuelstamps" list of submitted form entries
@@ -107,17 +108,10 @@ public class FuelstampController {
     {
         fuelstamps = new ArrayList<Fuelstamp>();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String json = (String)settings.getString(context.getString(R.string.SharedPreferences_savedFuelstampsKey), null);
-        FuelstampJsonReference parsedFuelstampList = new Gson().fromJson(json, FuelstampJsonReference.class);
-        if(parsedFuelstampList != null)
-        {
-            for(Fuelstamp stamp : parsedFuelstampList.fuelstampList)
-            {
-                fuelstamps.add(stamp);
-            }
-        }
-
-
+        String json = settings.getString(context.getString(R.string.SharedPreferences_savedFuelstampsKey), null);
+        GsonBuilder gson = new GsonBuilder();
+        Type listType = new TypeToken<ArrayList<Fuelstamp>>(){}.getType();
+        fuelstamps = gson.create().fromJson(json, listType);
     }
 
     /**
@@ -127,10 +121,10 @@ public class FuelstampController {
     {
         boolean success = true;
         try{
-        String json = new Gson().toJson(fuelstamps);
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        settings.edit().putString(context.getString(R.string.SharedPreferences_savedFuelstampsKey), json);
-        settings.edit().apply();
+            String json = new Gson().toJson(fuelstamps);
+            SharedPreferences.Editor settings = PreferenceManager.getDefaultSharedPreferences(context).edit();
+            settings.putString(context.getString(R.string.SharedPreferences_savedFuelstampsKey), json);
+            settings.apply();
         }catch (Exception ex)
         {
             success = false;
