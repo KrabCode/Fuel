@@ -28,7 +28,7 @@ public class Fuelstamp implements Comparable<Fuelstamp>{
         //I'd love to use string constants but I have no reference to them
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH);
         DecimalFormat twoDigitPrecision = new DecimalFormat("0.00");
-        DecimalFormat roundToNearestReal = new DecimalFormat("0");
+        DecimalFormat roundToNearestReal = new DecimalFormat("0.#");
         float costPerLitre = cost/litres;
         String result;
         if(full)
